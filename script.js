@@ -81,40 +81,29 @@ let ALL_PRODUCTS = [];
 
 // ── Firebase listener ─────────────────────────────────────────
 function initDataListeners(safetyTimer) {
-  // Settings
-  CONFIG_DOC.onSnapshot(snap => {
+  CONFIG_DOC.onSnapshot(function(snap) {
     if (snap.exists) {
-      const d = snap.data();
-      SITE_CONFIG.header    = { ...DEFAULTS.header,    ...(d.header    || {}) };
-      SITE_CONFIG.footer    = { ...DEFAULTS.footer,    ...(d.footer    || {}) };
-      SITE_CONFIG.separator = { ...DEFAULTS.separator, ...(d.separator || {}) };
+      var d = snap.data();
+      SITE_CONFIG.header    = Object.assign({}, DEFAULTS.header,    d.header    || {});
+      SITE_CONFIG.footer    = Object.assign({}, DEFAULTS.footer,    d.footer    || {});
+      SITE_CONFIG.separator = Object.assign({}, DEFAULTS.separator, d.separator || {});
     }
-    renderHeader();
-    renderSeparator();
-    renderFooter();
-  }, () => { renderHeader(); renderSeparator(); renderFooter(); });
+    renderHeader(); renderSeparator(); renderFooter();
+  }, function() { renderHeader(); renderSeparator(); renderFooter(); });
 
-  // Products
-  PRODUCTS_COL
-    .where('active', '==', true)
-    .orderBy('order', 'asc')
-    .onSnapshot(snap => {
+  PRODUCTS_COL.where('active','==',true).orderBy('order','asc')
+    .onSnapshot(function(snap) {
       clearTimeout(safetyTimer);
-      ALL_PRODUCTS = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      ALL_PRODUCTS = snap.docs.map(function(d){ return Object.assign({id:d.id},d.data()); });
       renderProducts(ALL_PRODUCTS);
-    }, err => {
+    }, function() {
       clearTimeout(safetyTimer);
-      console.warn('Products snapshot error:', err);
-      // Tenta sem filtro de indice
-      PRODUCTS_COL.get().then(snap => {
-        ALL_PRODUCTS = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-          .filter(p => p.active)
-          .sort((a, b) => (a.order || 0) - (b.order || 0));
+      PRODUCTS_COL.get().then(function(snap) {
+        ALL_PRODUCTS = snap.docs.map(function(d){ return Object.assign({id:d.id},d.data()); })
+          .filter(function(p){ return p.active; })
+          .sort(function(a,b){ return (a.order||0)-(b.order||0); });
         renderProducts(ALL_PRODUCTS);
-      }).catch(() => {
-        renderProducts([]);
-        removeLoadingState();
-      });
+      }).catch(function(){ renderProducts([]); removeLoadingState(); });
     });
 }
 
@@ -287,7 +276,7 @@ function buildProductCard(p) {
 
   // Media section
   const mediaDiv = el('div', { class: 'product-media' });
-  if (p.photo1 || p.photo2 || p.photo3) {
+  if (p.photo1 || p.photo2 || p.video) {
     const mediaGrid = el('div', { class: 'product-media-grid' });
 
     // Main photo
@@ -304,15 +293,17 @@ function buildProductCard(p) {
       mediaGrid.appendChild(imgThumb);
     }
 
-    // Photo 3
-    if (p.photo3) {
-      const img3 = el('div', { class: 'media-video-thumb' });
-      img3.appendChild(el('img', { src: p.photo3, alt: p.name, loading: 'lazy', style: 'width:100%;height:100%;object-fit:cover;' }));
-      mediaGrid.appendChild(img3);
+    // Video thumbnail
+    if (p.video) {
+      const vidThumb = el('div', { class: 'media-video-thumb', html: '<i class="fas fa-play-circle" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:2rem;color:rgba(255,255,255,.8);pointer-events:none;"></i>' });
+      vidThumb.style.position = 'relative';
+      const vt = getVideoThumbnail(p.video);
+      if (vt) vidThumb.style.backgroundImage = `url(${vt})`;
+      mediaGrid.appendChild(vidThumb);
     }
 
     // If only one media item, show full
-    if (!p.photo2 && !p.photo3 && p.photo1) {
+    if (!p.photo2 && !p.video && p.photo1) {
       mediaDiv.appendChild(el('img', { src: p.photo1, alt: p.name, loading: 'lazy', style: 'width:100%;height:100%;object-fit:cover;' }));
     } else {
       mediaDiv.appendChild(mediaGrid);
@@ -366,6 +357,14 @@ function formatPrice(price) {
   return isNaN(n) ? price : `R$ ${n.toFixed(2).replace('.', ',')}`;
 }
 
+function getVideoThumbnail(url) {
+  if (!url) return null;
+  const yt = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([^&\s]+)/);
+  if (yt) return `https://img.youtube.com/vi/${yt[1]}/mqdefault.jpg`;
+  const vm = url.match(/vimeo\.com\/(\d+)/);
+  if (vm) return null; // Vimeo requires API
+  return null;
+}
 
 // ── Product Modal ─────────────────────────────────────────────
 function openModal(p) {
@@ -383,10 +382,19 @@ function openModal(p) {
   if (p.photo2) {
     frame.appendChild(el('img', { class: 'modal-img-secondary', src: p.photo2, alt: p.name }));
   }
-  if (p.photo3) {
-    frame.appendChild(el('img', { class: 'modal-img-secondary', src: p.photo3, alt: p.name }));
+  if (p.video) {
+    const vDiv = el('div', { class: 'modal-video-frame' });
+    const ytId = (p.video.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([^&\s]+)/) || [])[1];
+    if (ytId) {
+      vDiv.appendChild(el('iframe', { src: `https://www.youtube.com/embed/${ytId}`, allowfullscreen: '', allow: 'autoplay' }));
+    } else {
+      const video = el('video', { controls: '', style: 'width:100%;height:100%;' });
+      video.appendChild(el('source', { src: p.video }));
+      vDiv.appendChild(video);
+    }
+    frame.appendChild(vDiv);
   }
-  if (!p.photo1 && !p.photo2 && !p.photo3) {
+  if (!p.photo1 && !p.photo2 && !p.video) {
     frame.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;background:var(--cream);color:var(--text-muted);"><i class="fas fa-image" style="font-size:3rem;opacity:.3;"></i></div>';
   }
 
@@ -553,43 +561,29 @@ function initModal() {
 }
 
 // ── Init ──────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
   initNavbar();
   initParticles();
   initModal();
   observeReveal();
-
-  // Render defaults imediatamente — pagina ja visivel
   renderHeader();
   renderSeparator();
   renderFooter();
 
-  // Timeout de seguranca: remove loading em no maximo 3s
-  const safetyTimer = setTimeout(() => {
+  // Timeout seguranca: remove loading em 4s se Firebase nao responder
+  var safetyTimer = setTimeout(function() {
     removeLoadingState();
-    const grid = qs('#products-grid');
-    if (grid && grid.innerHTML.includes('fa-spinner')) {
+    var grid = document.querySelector('#products-grid');
+    if (grid && grid.innerHTML.includes('fa-spinner'))
       grid.innerHTML = '<div class="empty-state"><i class="fas fa-box-open"></i><p>Nenhum produto cadastrado ainda.</p></div>';
-    }
-  }, 3000);
+  }, 4000);
 
-  // Verifica se Firebase esta configurado
   try {
-    const isConfigured = typeof firebase !== 'undefined' &&
-      firebase.apps.length > 0 &&
-      firebase.app().options.apiKey !== 'SUA_API_KEY';
-
-    if (!isConfigured) {
-      clearTimeout(safetyTimer);
-      renderProducts([]);
-      removeLoadingState();
-      return;
-    }
-
+    var ok = typeof firebase!=='undefined' && firebase.apps.length>0;
+    if (!ok) { clearTimeout(safetyTimer); renderProducts([]); removeLoadingState(); return; }
     initDataListeners(safetyTimer);
-  } catch (e) {
+  } catch(e) {
     clearTimeout(safetyTimer);
-    console.warn('Firebase nao configurado:', e);
     renderProducts([]);
     removeLoadingState();
   }

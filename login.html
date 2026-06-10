@@ -153,6 +153,7 @@
 <body>
 <div class="login-card">
   <div class="login-logo"><i class="fas fa-wand-magic-sparkles"></i></div>
+  <div id="session-bar"></div>
   <div class="stars">✦ ✦ ✦</div>
   <h1 class="login-title">Painel Admin</h1>
   <p class="login-subtitle">Acesso restrito ao administrador da loja.</p>
@@ -202,9 +203,23 @@ const errDiv      = document.getElementById('login-error');
 const successDiv  = document.getElementById('login-success');
 const togglePw    = document.getElementById('toggle-pw');
 
-// Ja logado -> redireciona
+// Ja logado -> redireciona automaticamente
 auth.onAuthStateChanged(user => {
-  if (user) window.location.href = 'admin.html';
+  if (user) {
+    // Mostra info de sessao ativa com opcao de sair
+    const card = document.querySelector('.login-card');
+    const sessionBar = document.getElementById('session-bar');
+    if (sessionBar) {
+      sessionBar.innerHTML = `
+        <div style="background:#D1FAE5;border:1px solid #6EE7B7;border-radius:10px;padding:.85rem 1rem;margin-bottom:1rem;font-size:.88rem;color:#065F46;display:flex;align-items:center;justify-content:space-between;gap:.5rem;">
+          <span><i class="fas fa-check-circle"></i> Sessão ativa: <strong>${user.email}</strong></span>
+          <button onclick="auth.signOut()" style="background:none;border:1px solid #059669;color:#059669;border-radius:6px;padding:.25rem .6rem;cursor:pointer;font-size:.78rem;font-family:inherit;">Sair</button>
+        </div>`;
+      setTimeout(() => { window.location.href = 'admin.html'; }, 1500);
+    } else {
+      window.location.href = 'admin.html';
+    }
+  }
 });
 
 // Mostrar/ocultar senha

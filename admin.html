@@ -12,6 +12,19 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
   <script src="firebase-config.js"></script>
+  <script>
+    // Guard imediato — redireciona para login se nao autenticado
+    // Esconde o body ate confirmar autenticacao
+    document.documentElement.style.visibility = 'hidden';
+
+    auth.onAuthStateChanged(function(user) {
+      if (!user) {
+        window.location.replace('login.html');
+      } else {
+        document.documentElement.style.visibility = '';
+      }
+    });
+  </script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

@@ -36,25 +36,39 @@ async function uploadFile(file, path) {
 // ── Auth Guard ────────────────────────────────────────────────
 let adminInitialized = false;
 
-// Timeout de seguranca: se Firebase nao responder em 8s, redireciona
-const authGuardTimer = setTimeout(() => {
-  window.location.href = 'login.html';
-}, 8000);
-
 function hideAuthLoading() {
-  clearTimeout(authGuardTimer);
   const overlay = document.getElementById('auth-loading');
   if (overlay) overlay.classList.add('hidden');
 }
 
+// Botao forcar saida — funciona independente do Auth
+document.addEventListener('DOMContentLoaded', () => {
+  const forceBtn = document.getElementById('btn-force-logout');
+  if (forceBtn) {
+    forceBtn.addEventListener('click', () => {
+      try { auth.signOut(); } catch(e) {}
+      window.location.href = 'login.html';
+    });
+  }
+
+  // Mostrar botao "Voltar ao login" apos 6 segundos se ainda carregando
+  setTimeout(() => {
+    const overlay = document.getElementById('auth-loading');
+    if (overlay && !overlay.classList.contains('hidden')) {
+      const btn = document.getElementById('btn-force-logout');
+      if (btn) btn.style.display = 'block';
+    }
+  }, 6000);
+});
+
 auth.onAuthStateChanged(user => {
   if (!user) {
-    clearTimeout(authGuardTimer);
     window.location.href = 'login.html';
     return;
   }
   hideAuthLoading();
-  qs('#admin-user-email').textContent = user.email;
+  const emailEl = document.getElementById('admin-user-email');
+  if (emailEl) emailEl.textContent = user.email;
   if (!adminInitialized) {
     adminInitialized = true;
     initAdmin();

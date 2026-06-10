@@ -454,7 +454,12 @@
       <a href="index.html" target="_blank" class="btn-topbar btn-view">
         <i class="fas fa-external-link-alt"></i> Ver Loja
       </a>
-      <button class="btn-topbar danger" id="btn-logout">
+      <button class="btn-topbar danger" id="btn-logout" onclick="
+        this.disabled=true;
+        this.innerHTML='<i class=\'fas fa-spinner fa-spin\'></i> Saindo...';
+        (typeof auth !== 'undefined' ? auth.signOut() : Promise.resolve())
+          .finally(() => { window.location.href = 'login.html'; });
+      ">
         <i class="fas fa-sign-out-alt"></i> Sair
       </button>
     </div>

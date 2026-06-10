@@ -376,6 +376,48 @@
     }
     .empty-msg i { font-size: 2.5rem; opacity: .3; display: block; margin-bottom: .75rem; }
 
+    /* ── Auth Loading Overlay ── */
+    #auth-loading {
+      position: fixed; inset: 0;
+      background: #1A0A2E;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 9999;
+      transition: opacity .4s ease, visibility .4s ease;
+    }
+    #auth-loading.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    #auth-loading .loader-text {
+      font-family: 'Playfair Display', serif;
+      color: #FFD700; font-size: 1.4rem; margin-bottom: 1.5rem;
+    }
+    #auth-loading .loader-bar {
+      width: 180px; height: 3px;
+      background: rgba(255,255,255,.1);
+      border-radius: 99px; overflow: hidden;
+    }
+    #auth-loading .loader-bar::after {
+      content: ''; display: block; height: 100%;
+      background: linear-gradient(90deg, #FF4FAD, #FFD700);
+      animation: bar 1.6s ease infinite;
+    }
+    @keyframes bar {
+      0%   { width:0; margin-left:0; }
+      50%  { width:100%; margin-left:0; }
+      100% { width:0; margin-left:100%; }
+    }
+    #auth-loading .btn-force-logout {
+      margin-top: 2rem;
+      padding: .6rem 1.5rem;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,.25);
+      color: rgba(255,255,255,.6);
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .85rem; cursor: pointer;
+      transition: all .2s; display: none;
+    }
+    #auth-loading .btn-force-logout:hover { background: rgba(255,255,255,.1); color: #fff; }
+
     /* Responsive sidebar */
     @media(max-width: 768px) {
       .admin-body { flex-direction: column; }
@@ -387,6 +429,15 @@
   </style>
 </head>
 <body>
+
+<!-- ════════════ AUTH LOADING ════════════ -->
+<div id="auth-loading">
+  <div class="loader-text">✦ Sonho Real Mix</div>
+  <div class="loader-bar"></div>
+  <button class="btn-force-logout" id="btn-force-logout">
+    <i class="fas fa-sign-out-alt"></i> Voltar ao login
+  </button>
+</div>
 
 <!-- ════════════ TOP BAR ════════════ -->
 <header class="admin-topbar">
@@ -811,5 +862,17 @@
 </div>
 
 <script src="admin.js"></script>
+<script>
+// Timeout de seguranca: se auth demorar mais de 5s, mostra botao de saida
+const authTimeout = setTimeout(() => {
+  const btn = document.getElementById('btn-force-logout');
+  if (btn) btn.style.display = 'block';
+}, 5000);
+
+// Botao forcar saida do overlay
+document.getElementById('btn-force-logout').addEventListener('click', () => {
+  auth.signOut().finally(() => { window.location.href = 'login.html'; });
+});
+</script>
 </body>
 </html>

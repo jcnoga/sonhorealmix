@@ -36,11 +36,24 @@ async function uploadFile(file, path) {
 // ── Auth Guard ────────────────────────────────────────────────
 let adminInitialized = false;
 
+// Timeout de seguranca: se Firebase nao responder em 8s, redireciona
+const authGuardTimer = setTimeout(() => {
+  window.location.href = 'login.html';
+}, 8000);
+
+function hideAuthLoading() {
+  clearTimeout(authGuardTimer);
+  const overlay = document.getElementById('auth-loading');
+  if (overlay) overlay.classList.add('hidden');
+}
+
 auth.onAuthStateChanged(user => {
   if (!user) {
+    clearTimeout(authGuardTimer);
     window.location.href = 'login.html';
     return;
   }
+  hideAuthLoading();
   qs('#admin-user-email').textContent = user.email;
   if (!adminInitialized) {
     adminInitialized = true;
@@ -64,9 +77,14 @@ function initTabs() {
 function initLogout() {
   const btn = qs('#btn-logout');
   if (!btn) return;
-  btn.addEventListener('click', () => {
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saindo...';
+
+  // Remove listeners antigos clonando o botao
+  const fresh = btn.cloneNode(true);
+  btn.parentNode.replaceChild(fresh, btn);
+
+  fresh.addEventListener('click', () => {
+    fresh.disabled = true;
+    fresh.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saindo...';
     auth.signOut()
       .then(() => { window.location.href = 'login.html'; })
       .catch(() => { window.location.href = 'login.html'; });

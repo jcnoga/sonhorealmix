@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vitrine de Produtos</title>
+  <meta name="description" content="Vitrine de produtos premium. Encontre os melhores produtos com as melhores condições." />
+  <meta property="og:title" content="Vitrine de Produtos" />
+  <meta property="og:description" content="Produtos selecionados com qualidade e elegância." />
+  <meta property="og:type" content="website" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">◆</span>
+        <span class="logo-text">Vitrine <span class="gold">Premium</span></span>
+      </div>
+      <p class="header-tagline">Produtos selecionados com qualidade e elegância</p>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-inner">
+      <p class="hero-eyebrow">Coleção Exclusiva</p>
+      <h1 class="hero-title">Descubra Produtos<br /><span class="gold">Excepcionais</span></h1>
+      <p class="hero-sub">Qualidade garantida · Entrega rápida · Melhor preço</p>
+    </div>
+  </section>
+
+  <!-- PRODUTOS -->
+  <main class="products-section">
+    <div id="products-container" class="products-list">
+      <!-- Produtos carregados dinamicamente via JS -->
+      <div class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>Carregando produtos...</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p class="footer-copy">© <span id="year"></span> Vitrine Premium · Todos os direitos reservados</p>
+      <p class="footer-note">Preços e disponibilidade sujeitos a alteração nas plataformas parceiras.</p>
+    </div>
+  </footer>
+
+  <!-- Firebase SDK (v9 compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+  <script src="script.js"></script>
+</body>
+</html>

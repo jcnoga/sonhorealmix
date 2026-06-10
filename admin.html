@@ -189,8 +189,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--dk);min-h
       <div class="card">
         <div class="card-title"><i class="fas fa-image"></i> Mídia</div>
         <div class="fgrid">
-          <div class="fg"><label>Logo — Upload</label><input type="file" id="h-logo-file" accept="image/*"><p class="hint">ou cole a URL:</p><input type="text" id="h-logo" placeholder="https://..."><img class="preview-img" id="h-logo-prev" alt="Logo"></div>
-          <div class="fg"><label>Banner de Fundo — Upload</label><input type="file" id="h-banner-file" accept="image/*"><p class="hint">ou cole a URL:</p><input type="text" id="h-banner-url" placeholder="https://..."><img class="preview-img" id="h-banner-prev" alt="Banner"></div>
+          <div class="fg"><label>Logo — URL da Imagem</label><input type="text" id="h-logo" placeholder="https://...png"><input type="hidden" id="h-logo-file"><img class="preview-img" id="h-logo-prev" alt="Logo"></div>
+          <div class="fg"><label>Banner de Fundo — URL da Imagem</label><input type="text" id="h-banner-url" placeholder="https://...jpg"><input type="hidden" id="h-banner-file"><img class="preview-img" id="h-banner-prev" alt="Banner"></div>
           <div class="fg"><label>Vídeo de Fundo (URL YouTube, Vimeo ou .mp4)</label><input type="text" id="h-bg-video-url" placeholder="https://..."></div>
         </div>
       </div>
@@ -277,7 +277,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--dk);min-h
           <div class="fg"><label>Link Termos de Uso</label><input type="text" id="f-terms-url" placeholder="#termos"></div>
           <div class="fg"><label>Cor de Fundo</label><input type="color" id="f-bg-color" value="#1A0A2E"></div>
           <div class="fg"><label>Cor dos Textos</label><input type="color" id="f-text-color" value="#FFFFFF"></div>
-          <div class="fg span-2"><label>Logo do Rodapé — Upload</label><input type="file" id="f-logo-file" accept="image/*"><img class="preview-img" id="f-logo-prev" alt="Logo"></div>
+          <div class="fg span-2"><label>Logo do Rodapé — URL da Imagem</label><input type="text" id="f-logo-url-input" placeholder="https://...png"><input type="hidden" id="f-logo-file"><img class="preview-img" id="f-logo-prev" alt="Logo"></div>
         </div>
       </div>
 
@@ -356,11 +356,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--dk);min-h
       </div>
 
       <div class="card">
-        <div class="card-title"><i class="fas fa-images"></i> Fotos (até 3)</div>
+        <div class="card-title"><i class="fas fa-images"></i> Fotos (até 3) — Cole a URL da imagem</div>
+        <p style="font-size:.8rem;color:#6B5E8A;margin-bottom:1rem;">Use URLs de imagens do Mercado Livre, Shopee, Google Drive (link direto), Imgur, etc.</p>
         <div class="fgrid fgrid-3">
-          <div class="fg"><label>Foto 1 — Upload</label><input type="file" id="pf-photo1-file" accept="image/*"><input type="text" id="pf-photo1-url" placeholder="ou URL da foto" style="margin-top:.35rem"><img class="preview-img" id="pf-photo1-prev" alt="F1"></div>
-          <div class="fg"><label>Foto 2 — Upload</label><input type="file" id="pf-photo2-file" accept="image/*"><input type="text" id="pf-photo2-url" placeholder="ou URL da foto" style="margin-top:.35rem"><img class="preview-img" id="pf-photo2-prev" alt="F2"></div>
-          <div class="fg"><label>Foto 3 — Upload</label><input type="file" id="pf-photo3-file" accept="image/*"><input type="text" id="pf-photo3-url" placeholder="ou URL da foto" style="margin-top:.35rem"><img class="preview-img" id="pf-photo3-prev" alt="F3"></div>
+          <div class="fg"><label>Foto 1 — URL</label><input type="text" id="pf-photo1-url" placeholder="https://...jpg"><input type="hidden" id="pf-photo1-file"><img class="preview-img" id="pf-photo1-prev" alt="F1"></div>
+          <div class="fg"><label>Foto 2 — URL</label><input type="text" id="pf-photo2-url" placeholder="https://...jpg"><input type="hidden" id="pf-photo2-file"><img class="preview-img" id="pf-photo2-prev" alt="F2"></div>
+          <div class="fg"><label>Foto 3 — URL</label><input type="text" id="pf-photo3-url" placeholder="https://...jpg"><input type="hidden" id="pf-photo3-file"><img class="preview-img" id="pf-photo3-prev" alt="F3"></div>
         </div>
       </div>
 

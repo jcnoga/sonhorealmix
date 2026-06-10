@@ -33,9 +33,8 @@ function setBtn(btn, loading, label) {
 }
 
 async function uploadFile(file, path) {
-  var ref = storage.ref(path);
-  await ref.put(file);
-  return ref.getDownloadURL();
+  // Storage requer plano pago - use URLs diretas
+  throw new Error('Use a URL da imagem em vez de fazer upload de arquivo.');
 }
 
 // ── Auth Guard ────────────────────────────────────────────────
@@ -123,11 +122,9 @@ async function initHeaderForm() {
         var el = qs('#h-'+f.replace(/_/g,'-'));
         h[f] = el ? el.value : '';
       });
-      var lf = qs('#h-logo-file') && qs('#h-logo-file').files[0];
-      if (lf) h.logo_url = await uploadFile(lf, 'uploads/logo_'+Date.now());
-      else     h.logo_url = currentHeader.logo_url || '';
-      var bf = qs('#h-banner-file') && qs('#h-banner-file').files[0];
-      if (bf) h.banner_url = await uploadFile(bf, 'uploads/banner_'+Date.now());
+      // Logo: usa URL do campo de texto
+      h.logo_url = qs('#h-logo') ? qs('#h-logo').value : (currentHeader.logo_url || '');
+      if (!h.logo_url) h.logo_url = currentHeader.logo_url || '';
 
       await db.collection('settings').doc('site').set({ header: h }, { merge: true });
       currentHeader = h;
@@ -175,9 +172,7 @@ async function initFooterForm() {
         var el = qs('#f-'+field.replace(/_/g,'-'));
         f[field] = el ? el.value : '';
       });
-      var lf = qs('#f-logo-file') && qs('#f-logo-file').files[0];
-      if (lf) f.logo_url = await uploadFile(lf, 'uploads/flogo_'+Date.now());
-      else     f.logo_url = currentFooter.logo_url || '';
+      f.logo_url = currentFooter.logo_url || '';
 
       await db.collection('settings').doc('site').set({ footer: f }, { merge: true });
       currentFooter = f;
@@ -362,16 +357,9 @@ async function saveProd() {
 
   setBtn(btn, true);
   try {
-    var photo1 = qs('#pf-photo1-url').value;
-    var photo2 = qs('#pf-photo2-url').value;
-    var photo3 = qs('#pf-photo3-url').value;
-
-    var f1 = qs('#pf-photo1-file').files[0];
-    var f2 = qs('#pf-photo2-file').files[0];
-    var f3 = qs('#pf-photo3-file').files[0];
-    if (f1) photo1 = await uploadFile(f1, 'products/'+Date.now()+'_p1');
-    if (f2) photo2 = await uploadFile(f2, 'products/'+Date.now()+'_p2');
-    if (f3) photo3 = await uploadFile(f3, 'products/'+Date.now()+'_p3');
+    var photo1 = qs('#pf-photo1-url').value.trim();
+    var photo2 = qs('#pf-photo2-url').value.trim();
+    var photo3 = qs('#pf-photo3-url').value.trim();
 
     var data = {
       name:        name,

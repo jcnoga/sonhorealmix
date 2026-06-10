@@ -34,13 +34,18 @@ async function uploadFile(file, path) {
 }
 
 // ── Auth Guard ────────────────────────────────────────────────
+let adminInitialized = false;
+
 auth.onAuthStateChanged(user => {
   if (!user) {
     window.location.href = 'login.html';
     return;
   }
   qs('#admin-user-email').textContent = user.email;
-  initAdmin();
+  if (!adminInitialized) {
+    adminInitialized = true;
+    initAdmin();
+  }
 });
 
 // ── Tab navigation ────────────────────────────────────────────
@@ -57,9 +62,14 @@ function initTabs() {
 
 // ── Logout ────────────────────────────────────────────────────
 function initLogout() {
-  qs('#btn-logout').addEventListener('click', async () => {
-    await auth.signOut();
-    window.location.href = 'login.html';
+  const btn = qs('#btn-logout');
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saindo...';
+    auth.signOut()
+      .then(() => { window.location.href = 'login.html'; })
+      .catch(() => { window.location.href = 'login.html'; });
   });
 }
 

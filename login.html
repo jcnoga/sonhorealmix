@@ -79,8 +79,7 @@ var btnC = document.getElementById('btnC');
 var msg  = document.getElementById('msg');
 var eye  = document.getElementById('eye');
 
-// Se ja logado, redireciona
-auth.onAuthStateChanged(function(u){ if(u) go('admin.html'); });
+auth.onAuthStateChanged(function(u){ if(u) window.location.href='admin.html'; });
 
 eye.onclick = function(){
   var s = pw.type==='password';
@@ -91,18 +90,17 @@ pw.onkeydown = function(e){ if(e.key==='Enter') login(); };
 btnE.onclick = login;
 btnC.onclick = criar;
 
-function go(url){ window.location.href = url; }
 function setBtn(b,dis,html){ b.disabled=dis; b.innerHTML=html; }
 function showMsg(t,c){ msg.textContent=t; msg.className='msg '+c; }
 
 var ERROS = {
-  'auth/user-not-found':    'Usuário não encontrado.',
-  'auth/wrong-password':    'Senha incorreta.',
-  'auth/invalid-credential':'E-mail ou senha incorretos.',
-  'auth/invalid-email':     'E-mail inválido.',
-  'auth/too-many-requests': 'Muitas tentativas. Aguarde.',
+  'auth/user-not-found':     'Usuário não encontrado.',
+  'auth/wrong-password':     'Senha incorreta.',
+  'auth/invalid-credential': 'E-mail ou senha incorretos.',
+  'auth/invalid-email':      'E-mail inválido.',
+  'auth/too-many-requests':  'Muitas tentativas. Aguarde.',
   'auth/email-already-in-use':'Este e-mail já tem conta. Use Entrar.',
-  'auth/weak-password':     'Senha mínima: 6 caracteres.'
+  'auth/weak-password':      'Senha mínima: 6 caracteres.'
 };
 
 function login(){
@@ -111,7 +109,7 @@ function login(){
   msg.className='msg';
   setBtn(btnE,true,'<i class="fas fa-spinner fa-spin"></i> Entrando...');
   auth.signInWithEmailAndPassword(e,s)
-    .then(function(){ go('admin.html'); })
+    .then(function(){ window.location.href='admin.html'; })
     .catch(function(er){
       showMsg(ERROS[er.code]||'Erro: '+er.message,'err');
       setBtn(btnE,false,'<i class="fas fa-sign-in-alt"></i> Entrar');
@@ -127,7 +125,7 @@ function criar(){
   auth.createUserWithEmailAndPassword(e,s)
     .then(function(){
       showMsg('Conta criada! Redirecionando...','suc');
-      setTimeout(function(){ go('admin.html'); },1000);
+      setTimeout(function(){ window.location.href='admin.html'; },1000);
     })
     .catch(function(er){
       showMsg(ERROS[er.code]||'Erro: '+er.message,'err');

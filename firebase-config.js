@@ -1,4 +1,3 @@
-// firebase-config.js — Sonho Real Mix
 if (!firebase.apps.length) {
   firebase.initializeApp({
     apiKey:            "AIzaSyCk7j2q4ZSid99mTPp9yp12dKS2XM_gIVI",

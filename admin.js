@@ -41,8 +41,10 @@ function hideAuthLoading() {
   if (overlay) overlay.classList.add('hidden');
 }
 
-// Botao forcar saida — funciona independente do Auth
+// Tudo dentro do DOMContentLoaded para garantir que o DOM existe
 document.addEventListener('DOMContentLoaded', () => {
+
+  // Botao forcar saida no overlay
   const forceBtn = document.getElementById('btn-force-logout');
   if (forceBtn) {
     forceBtn.addEventListener('click', () => {
@@ -51,28 +53,33 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Mostrar botao "Voltar ao login" apos 6 segundos se ainda carregando
-  setTimeout(() => {
+  // Mostrar botao de saida apos 6s se ainda travado
+  const forceTimer = setTimeout(() => {
     const overlay = document.getElementById('auth-loading');
     if (overlay && !overlay.classList.contains('hidden')) {
-      const btn = document.getElementById('btn-force-logout');
-      if (btn) btn.style.display = 'block';
+      if (forceBtn) forceBtn.style.display = 'block';
     }
   }, 6000);
-});
 
-auth.onAuthStateChanged(user => {
-  if (!user) {
-    window.location.href = 'login.html';
-    return;
-  }
-  hideAuthLoading();
-  const emailEl = document.getElementById('admin-user-email');
-  if (emailEl) emailEl.textContent = user.email;
-  if (!adminInitialized) {
-    adminInitialized = true;
-    initAdmin();
-  }
+  // Auth listener — dentro do DOMContentLoaded
+  auth.onAuthStateChanged(user => {
+    if (!user) {
+      clearTimeout(forceTimer);
+      window.location.href = 'login.html';
+      return;
+    }
+    clearTimeout(forceTimer);
+    hideAuthLoading();
+
+    const emailEl = document.getElementById('admin-user-email');
+    if (emailEl) emailEl.textContent = user.email;
+
+    if (!adminInitialized) {
+      adminInitialized = true;
+      initAdmin();
+    }
+  });
+
 });
 
 // ── Tab navigation ────────────────────────────────────────────

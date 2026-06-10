@@ -4,12 +4,14 @@
 // ============================================================
 
 const firebaseConfig = {
-  apiKey: "SUA_API_KEY",
-  authDomain: "SEU_PROJECT.firebaseapp.com",
-  projectId: "SEU_PROJECT_ID",
-  storageBucket: "SEU_PROJECT.appspot.com",
-  messagingSenderId: "SEU_SENDER_ID",
-  appId: "SEU_APP_ID"
+const firebaseConfig = {
+  apiKey: "AIzaSyCk7j2q4ZSid99mTPp9yp12dKS2XM_gIVI",
+  authDomain: "sonhorealmix.firebaseapp.com",
+  projectId: "sonhorealmix",
+  storageBucket: "sonhorealmix.firebasestorage.app",
+  messagingSenderId: "133225034441",
+  appId: "1:133225034441:web:4f87f4807837cccb6f5318",
+  measurementId: "G-HL8K48JZBS"
 };
 
 // Inicializa Firebase

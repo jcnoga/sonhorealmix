@@ -13,17 +13,28 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
   <script src="firebase-config.js"></script>
   <script>
-    // Guard imediato — redireciona para login se nao autenticado
-    // Esconde o body ate confirmar autenticacao
+    // Guard: auth ja esta disponivel pois firebase-config.js carregou acima (script sincrono)
+    // Esconde ate confirmar sessao
     document.documentElement.style.visibility = 'hidden';
-
-    auth.onAuthStateChanged(function(user) {
-      if (!user) {
-        window.location.replace('login.html');
-      } else {
-        document.documentElement.style.visibility = '';
-      }
-    });
+    var __authTimer = setTimeout(function() {
+      window.location.replace('login.html');
+    }, 8000);
+    try {
+      auth.onAuthStateChanged(function(u) {
+        clearTimeout(__authTimer);
+        if (!u) {
+          window.location.replace('login.html');
+        } else {
+          document.documentElement.style.visibility = '';
+          var el = document.getElementById('admin-user-email');
+          if (el) el.textContent = u.email;
+        }
+      });
+    } catch(err) {
+      // Firebase nao inicializado corretamente
+      clearTimeout(__authTimer);
+      window.location.replace('login.html');
+    }
   </script>
 
   <style>
@@ -467,14 +478,7 @@
       <a href="index.html" target="_blank" class="btn-topbar btn-view">
         <i class="fas fa-external-link-alt"></i> Ver Loja
       </a>
-      <button class="btn-topbar danger" id="btn-logout" onclick="
-        this.disabled=true;
-        this.innerHTML='<i class=\'fas fa-spinner fa-spin\'></i> Saindo...';
-        (typeof auth !== 'undefined' ? auth.signOut() : Promise.resolve())
-          .finally(() => { window.location.href = 'login.html'; });
-      ">
-        <i class="fas fa-sign-out-alt"></i> Sair
-      </button>
+      <button class="btn-topbar danger" id="btn-logout" onclick="auth.signOut().then(function(){window.location.href='login.html';}).catch(function(){window.location.href='login.html';});this.innerHTML='Saindo...';" ><i class="fas fa-sign-out-alt"></i> Sair</button>
     </div>
   </div>
 </header>

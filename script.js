@@ -80,7 +80,7 @@ let SITE_CONFIG = JSON.parse(JSON.stringify(DEFAULTS));
 let ALL_PRODUCTS = [];
 
 // ── Firebase listener ─────────────────────────────────────────
-function initDataListeners() {
+function initDataListeners(safetyTimer) {
   // Settings
   CONFIG_DOC.onSnapshot(snap => {
     if (snap.exists) {
@@ -99,13 +99,21 @@ function initDataListeners() {
     .where('active', '==', true)
     .orderBy('order', 'asc')
     .onSnapshot(snap => {
+      clearTimeout(safetyTimer);
       ALL_PRODUCTS = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       renderProducts(ALL_PRODUCTS);
     }, err => {
+      clearTimeout(safetyTimer);
       console.warn('Products snapshot error:', err);
-      PRODUCTS_COL.orderBy('order', 'asc').get().then(snap => {
-        ALL_PRODUCTS = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(p => p.active);
+      // Tenta sem filtro de indice
+      PRODUCTS_COL.get().then(snap => {
+        ALL_PRODUCTS = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+          .filter(p => p.active)
+          .sort((a, b) => (a.order || 0) - (b.order || 0));
         renderProducts(ALL_PRODUCTS);
+      }).catch(() => {
+        renderProducts([]);
+        removeLoadingState();
       });
     });
 }
@@ -551,16 +559,37 @@ document.addEventListener('DOMContentLoaded', () => {
   initModal();
   observeReveal();
 
-  // Show defaults while Firebase loads
+  // Render defaults imediatamente — pagina ja visivel
   renderHeader();
   renderSeparator();
   renderFooter();
 
-  // Load from Firebase
+  // Timeout de seguranca: remove loading em no maximo 3s
+  const safetyTimer = setTimeout(() => {
+    removeLoadingState();
+    const grid = qs('#products-grid');
+    if (grid && grid.innerHTML.includes('fa-spinner')) {
+      grid.innerHTML = '<div class="empty-state"><i class="fas fa-box-open"></i><p>Nenhum produto cadastrado ainda.</p></div>';
+    }
+  }, 3000);
+
+  // Verifica se Firebase esta configurado
   try {
-    initDataListeners();
+    const isConfigured = typeof firebase !== 'undefined' &&
+      firebase.apps.length > 0 &&
+      firebase.app().options.apiKey !== 'SUA_API_KEY';
+
+    if (!isConfigured) {
+      clearTimeout(safetyTimer);
+      renderProducts([]);
+      removeLoadingState();
+      return;
+    }
+
+    initDataListeners(safetyTimer);
   } catch (e) {
-    console.warn('Firebase not configured:', e);
+    clearTimeout(safetyTimer);
+    console.warn('Firebase nao configurado:', e);
     renderProducts([]);
     removeLoadingState();
   }

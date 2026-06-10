@@ -34,52 +34,14 @@ async function uploadFile(file, path) {
 }
 
 // ── Auth Guard ────────────────────────────────────────────────
-let adminInitialized = false;
-
-function hideAuthLoading() {
-  const overlay = document.getElementById('auth-loading');
+// Admin inicializado uma unica vez apos DOM pronto
+document.addEventListener('DOMContentLoaded', function() {
+  // Esconde overlay de loading
+  var overlay = document.getElementById('auth-loading');
   if (overlay) overlay.classList.add('hidden');
-}
 
-// Tudo dentro do DOMContentLoaded para garantir que o DOM existe
-document.addEventListener('DOMContentLoaded', () => {
-
-  // Botao forcar saida no overlay
-  const forceBtn = document.getElementById('btn-force-logout');
-  if (forceBtn) {
-    forceBtn.addEventListener('click', () => {
-      try { auth.signOut(); } catch(e) {}
-      window.location.href = 'login.html';
-    });
-  }
-
-  // Mostrar botao de saida apos 6s se ainda travado
-  const forceTimer = setTimeout(() => {
-    const overlay = document.getElementById('auth-loading');
-    if (overlay && !overlay.classList.contains('hidden')) {
-      if (forceBtn) forceBtn.style.display = 'block';
-    }
-  }, 6000);
-
-  // Auth listener — dentro do DOMContentLoaded
-  auth.onAuthStateChanged(user => {
-    if (!user) {
-      clearTimeout(forceTimer);
-      window.location.href = 'login.html';
-      return;
-    }
-    clearTimeout(forceTimer);
-    hideAuthLoading();
-
-    const emailEl = document.getElementById('admin-user-email');
-    if (emailEl) emailEl.textContent = user.email;
-
-    if (!adminInitialized) {
-      adminInitialized = true;
-      initAdmin();
-    }
-  });
-
+  // Inicia o painel
+  initAdmin();
 });
 
 // ── Tab navigation ────────────────────────────────────────────
@@ -94,22 +56,10 @@ function initTabs() {
   });
 }
 
-// ── Logout ────────────────────────────────────────────────────
+// ── Logout ─ tratado via onclick inline no HTML ──────────────
 function initLogout() {
-  const btn = qs('#btn-logout');
-  if (!btn) return;
-
-  // Remove listeners antigos clonando o botao
-  const fresh = btn.cloneNode(true);
-  btn.parentNode.replaceChild(fresh, btn);
-
-  fresh.addEventListener('click', () => {
-    fresh.disabled = true;
-    fresh.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saindo...';
-    auth.signOut()
-      .then(() => { window.location.href = 'login.html'; })
-      .catch(() => { window.location.href = 'login.html'; });
-  });
+  // Logout ja esta no onclick do botao no admin.html
+  // Nada a fazer aqui
 }
 
 // ── Change Password ───────────────────────────────────────────

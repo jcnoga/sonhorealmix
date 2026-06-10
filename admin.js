@@ -209,34 +209,46 @@ function initHeaderForm() {
   saveBtn.addEventListener('click', async () => {
     loadingBtn(saveBtn, true);
     try {
+      // Coleta campos de texto
       const h = {};
       const fields = ['company','slogan','desc','bg_color','text_color','btn1_text','btn1_link',
         'btn2_text','btn2_link','whatsapp','phone','email','instagram','facebook','tiktok','youtube',
         'banner_url','bg_video_url'];
       fields.forEach(f => {
         const el = qs(`#header-${f.replace(/_/g,'-')}`);
-        if (el) h[f] = el.value;
+        if (el) h[f] = el.value || '';
       });
 
-      // Logo upload
+      // Mantém logo existente ou faz upload
       const logoFile = qs('#header-logo-upload')?.files[0];
       if (logoFile) {
-        h.logo_url = await uploadFile(logoFile, `uploads/logo_${Date.now()}_${logoFile.name}`);
+        toast('Enviando logo...', 'info');
+        h.logo_url = await uploadFile(logoFile, `uploads/logo_${Date.now()}`);
       } else {
         h.logo_url = (currentConfig.header || {}).logo_url || '';
       }
 
-      // Banner upload
+      // Mantém banner existente ou faz upload
       const bannerFile = qs('#header-banner-upload')?.files[0];
       if (bannerFile) {
-        h.banner_url = await uploadFile(bannerFile, `uploads/banner_${Date.now()}_${bannerFile.name}`);
+        toast('Enviando banner...', 'info');
+        h.banner_url = await uploadFile(bannerFile, `uploads/banner_${Date.now()}`);
       }
 
-      await CONFIG_DOC.set({ header: h }, { merge: true });
+      // Salva no Firestore
+      toast('Salvando...', 'info');
+      await db.collection('settings').doc('site').set({ header: h }, { merge: true });
       currentConfig.header = h;
-      toast('Cabeçalho salvo!', 'success');
+      toast('Cabeçalho salvo com sucesso!', 'success');
     } catch (e) {
-      toast(`Erro: ${e.message}`, 'error');
+      console.error('Erro ao salvar cabeçalho:', e);
+      if (e.code === 'permission-denied') {
+        toast('Erro de permissão. Verifique as regras do Firestore.', 'error');
+      } else if (e.code === 'unavailable') {
+        toast('Firestore indisponível. Verifique sua conexão.', 'error');
+      } else {
+        toast(`Erro: ${e.code || e.message}`, 'error');
+      }
     }
     loadingBtn(saveBtn, false, origLabel);
   });
@@ -299,11 +311,16 @@ function initFooterForm() {
         f.logo_url = (currentConfig.footer || {}).logo_url || '';
       }
 
-      await CONFIG_DOC.set({ footer: f }, { merge: true });
+      await db.collection('settings').doc('site').set({ footer: f }, { merge: true });
       currentConfig.footer = f;
-      toast('Rodapé salvo!', 'success');
+      toast('Rodapé salvo com sucesso!', 'success');
     } catch (e) {
-      toast(`Erro: ${e.message}`, 'error');
+      console.error('Erro ao salvar rodapé:', e);
+      if (e.code === 'permission-denied') {
+        toast('Erro de permissão. Verifique as regras do Firestore.', 'error');
+      } else {
+        toast(`Erro: ${e.code || e.message}`, 'error');
+      }
     }
     loadingBtn(saveBtn, false, origLabel);
   });
@@ -362,10 +379,11 @@ function initSeparatorForm() {
         style:     qs('#sep-style').value,
         spacing:   Number(qs('#sep-spacing').value)
       };
-      await CONFIG_DOC.set({ separator: s }, { merge: true });
+      await db.collection('settings').doc('site').set({ separator: s }, { merge: true });
       toast('Separador salvo!', 'success');
     } catch (e) {
-      toast(`Erro: ${e.message}`, 'error');
+      console.error('Erro ao salvar separador:', e);
+      toast(`Erro: ${e.code || e.message}`, 'error');
     }
     loadingBtn(saveBtn, false, origLabel);
   });
